@@ -8,6 +8,12 @@ class ProductsService {
    static async getProducts(queries) {
       try {
          let filter = {};
+         Object.keys(queries).forEach((key) => {
+            if (!["minPrice", "maxPrice", "sort", "limit", "page", "skip"].includes(key)) {
+               // Exclude special keywords and handle other properties dynamically
+               filter[key] = queries[key];
+            }
+         });
          // Handle price range queries
          if (queries.minPrice || queries.maxPrice) {
             filter.price = {};
@@ -25,20 +31,22 @@ class ProductsService {
             sortOptions = { price: sortOrder };
          }
          // Handle pagination queries
-         const limit = parseInt(queries.limit) || 25; 
-         const page = parseInt(queries.page) || 1; 
+         const limit = parseInt(queries.limit) || 25;
+         const page = parseInt(queries.page) || 1;
          const skip = (page - 1) * limit;
-
          // Fetch products with pagination and sorting
          const products = await ProductsModel.find(filter)
             .sort(sortOptions)
             .limit(limit)
             .skip(skip);
-         // Calculate total pages   
+         // Calculate total pages
          const totalCount = await ProductsModel.countDocuments(filter);
          const totalPages = Math.ceil(totalCount / limit);
-         if(page > totalPages){
-            return resFail(400, "Page Not Found",);
+         if (totalCount == 0) {
+            return resFail(400, "No products found with specified filters");
+         }
+         if (page > totalPages) {
+            return resFail(400, "Page Not Found");
          }
          return resSuccess(200, "Displaying Products", { products, totalPages });
       } catch (error) {
