@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const schema = new mongoose.Schema(
    {
@@ -59,6 +60,15 @@ const schema = new mongoose.Schema(
       versionKey: false,
    }
 );
+
+schema.pre("validate", function (next) {
+   if (this.category) {
+      this.category = this.category.toLowerCase();
+   }
+   this.slug = slugify(this.title);
+
+   next();
+});
 
 const ProductsModel = mongoose.model("products", schema);
 

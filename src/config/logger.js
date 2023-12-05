@@ -24,6 +24,8 @@ const myCustomLevels = {
    },
 };
 
+/* // Time Only //
+
 const myFormat = printf(({ level, message }) => {
    return `[${new Date().toLocaleTimeString()}] [${level}]: ${message}`;
 });
@@ -31,13 +33,46 @@ const myFormat = printf(({ level, message }) => {
 const myFormatFile = printf(({ level, message }) => {
    return `[${new Date().toLocaleTimeString()}] [${level.toLocaleUpperCase()}]: ${message}`;
 });
+*/
 
-addColors(myCustomLevels.colors); // Agrega los colores personalizados
+// Date and Time //
+
+const myFormat = printf(({ level, message }) => {
+   const now = new Date();
+   const options = { 
+      weekday: "long",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+   };
+   const formattedDate = now.toLocaleString("en-GB", options);
+   return `[${formattedDate}] [${level}]: ${message}`;
+});
+
+const myFormatFile = printf(({ level, message }) => {
+   const now = new Date();
+   const options = {
+      weekday: "long",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+   };
+   const formattedDate = now.toLocaleString("en-GB", options);
+   return `[${formattedDate}] [${level.toLocaleUpperCase()}]: ${message}`;
+});
+
+addColors(myCustomLevels.colors);
 
 switch (process.env.ENVIRONMENT) {
    case "DEVELOPMENT":
       logger = createLogger({
-         levels: myCustomLevels.levels, // Niveles personalizados
+         levels: myCustomLevels.levels,
          transports: [
             new transports.Console({
                level: "debug",
@@ -86,7 +121,9 @@ export const addLogger = (req, res, next) => {
       const end = Date.now(); // Record the end time
       const duration = end - start; // Calculate the duration
 
-      req.logger.http(`${req.method} Method hit on ${req.url} from [${ipClient}] - ${duration}ms`);
+      req.logger.http(
+         `${req.method} Method hit on ${req.url} from [${ipClient}] - ${duration}ms`
+      );
    });
 
    next();

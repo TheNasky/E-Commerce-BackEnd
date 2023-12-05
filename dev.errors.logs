@@ -1,4 +1,0 @@
-[4:17:00 AM] [ERROR]: ReferenceError: error is not defined
-    at ProductsService.getProducts (file:///C:/Users/TheNasky/Documents/_Workspace/Express.Js/src/services/productsService.js:9:10)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async getProducts (file:///C:/Users/TheNasky/Documents/_Workspace/Express.Js/src/controllers/productsController.js:5:20)

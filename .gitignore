@@ -3,3 +3,7 @@
 
 # environment
 *.env
+
+# errors
+*.errors.logs
+errors.logs
