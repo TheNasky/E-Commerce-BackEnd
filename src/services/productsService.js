@@ -98,9 +98,7 @@ class ProductsService {
             product[key] = updatedProperties[key];
          });
          await product.save({ new: true });
-         return resSuccess(200, "Product " + id + " Updated Successfully", {
-            updatedProduct: product,
-         });
+         return resSuccess(200, "Product " + id + " Updated Successfully", { product });
       } catch (error) {
          logger.error(`${error.stack}`);
          return resFail(500, "Internal Server Error");

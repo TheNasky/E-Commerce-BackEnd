@@ -6,12 +6,13 @@ import passport from "passport";
 import initializePassport from "./config/passport.js";
 import compression from "compression";
 import MongoStore from "connect-mongo";
-import { connectDb } from "./config/mongoConnect.js";
+import { connectDb } from "./config/utils/mongoConnect.js";
 import { addLogger } from "./config/logger.js"; // Import logger and addLogger
 
 import authRouter from "./routers/authRouter.js";
 import usersRouter from "./routers/usersRouter.js";
 import productsRouter from "./routers/productsRouter.js";
+import blogsRouter from "./routers/blogsRouter.js";
 
 connectDb();
 const PORT = process.env.PORT || 3000;
@@ -48,7 +49,7 @@ app.use(compression({})); // Enable response compression
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/products", productsRouter);
-
+app.use("/api/blogs", blogsRouter);
 // Error handlers //
 
 //  Bad JSON //

@@ -14,7 +14,7 @@ usersRouter.get("/", isAdmin, getUsers);
 usersRouter.get("/:id", isAdmin, getUser);
 usersRouter.delete("/:id", isAdmin, deleteUser);
 usersRouter.put("/:id", isAdmin, updateUser);
-usersRouter.post("/block/:id", isAdmin, blockUser);
-usersRouter.post("/unblock/:id", isAdmin, unblockUser);
+usersRouter.put("/block/:id", isAdmin, blockUser);
+usersRouter.put("/unblock/:id", isAdmin, unblockUser);
 
 export default usersRouter;

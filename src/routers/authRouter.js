@@ -1,11 +1,22 @@
 import express from "express";
 const authRouter = express.Router();
-import { getSession, createUser, loginUser, logout } from "../controllers/usersController.js";
+import {
+   getSession,
+   createUser,
+   loginUser,
+   logout,
+   requestPasswordReset,
+   verifyPasswordResetToken,
+   resetPassword,
+} from "../controllers/usersController.js";
 import { isAdmin } from "../middlewares/auth.js";
 
-authRouter.get("/session", isAdmin, getSession);
+authRouter.get("/session", getSession); // isAdmin,
 authRouter.post("/register", createUser);
 authRouter.post("/login", loginUser);
 authRouter.post("/logout", logout);
+authRouter.post("/reset-password/request", requestPasswordReset);
+authRouter.get("/reset-password/verify/:email/:resetToken", verifyPasswordResetToken);
+authRouter.post("/reset-password/reset", resetPassword);
 
 export default authRouter;

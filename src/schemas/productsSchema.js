@@ -49,10 +49,7 @@ const schema = new mongoose.Schema(
          enum: ["black", "brown", "red"],
       },
       ratings: [
-         {
-            star: Number,
-            postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-         },
+         { star: Number, postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" } },
       ],
    },
    {

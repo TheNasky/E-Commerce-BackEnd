@@ -39,7 +39,7 @@ const myFormatFile = printf(({ level, message }) => {
 
 const myFormat = printf(({ level, message }) => {
    const now = new Date();
-   const options = { 
+   const options = {
       weekday: "long",
       day: "numeric",
       month: "numeric",
@@ -120,9 +120,8 @@ export const addLogger = (req, res, next) => {
    res.on("finish", () => {
       const end = Date.now(); // Record the end time
       const duration = end - start; // Calculate the duration
-
       req.logger.http(
-         `${req.method} Method hit on ${req.url} from [${ipClient}] - ${duration}ms`
+         `${req.method} Method hit on ${req.originalUrl} from [${ipClient}] - ${duration}ms`
       );
    });
 

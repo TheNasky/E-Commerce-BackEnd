@@ -26,18 +26,23 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
    const { email, password } = req.body;
    const service = await UsersService.loginUser(email, password);
-   req.session.user = {
-      _id: service.payload.user._id,
-      email: service.payload.user.email,
-      firstName: service.payload.user.firstName,
-      lastName: service.payload.user.lastName,
-      age: service.payload.user.age,
-      cart: service.payload.user.cart,
-      roles: service.payload.user.roles,
-   };
-   if (service.payload.vfToken != 0) {
-      req.session.user.vfToken = service.payload.vfToken;
+   console.log(service);
+   console.log(service.payload.user);
+   if (service.payload.user) {
+      req.session.user = {
+         _id: service.payload.user._id,
+         email: service.payload.user.email,
+         firstName: service.payload.user.firstName,
+         lastName: service.payload.user.lastName,
+         age: service.payload.user.age,
+         cart: service.payload.user.cart,
+         roles: service.payload.user.roles,
+      };
+      if (service.payload.vfToken != 0) {
+         req.session.user.vfToken = service.payload.vfToken;
+      }
    }
+
    const { payload, ...strippedService } = service;
    return response(res, strippedService);
 };
@@ -45,9 +50,9 @@ export const loginUser = async (req, res) => {
 export const logout = (req, res) => {
    req.session.destroy((err) => {
       if (err) {
-         return res.status(500).render("error", { error: "Failed to end session" });
+         return res.status(500).json({ error: "Failed to end session" });
       }
-      return res.redirect("/auth/login");
+      return res.status(200).json({ success: true, message: "Logged out"});
    });
 };
 
@@ -86,5 +91,26 @@ export const blockUser = async (req, res) => {
 export const unblockUser = async (req, res) => {
    const { id } = req.params;
    const service = await UsersService.unblockUser(id);
+   return response(res, service);
+};
+
+export const requestPasswordReset = async (req, res) => {
+   const { email } = req.body;
+   const service = await UsersService.requestPasswordReset(email);
+   req.session.destroy();
+   return response(res, service);
+};
+
+export const verifyPasswordResetToken = async (req, res) => {
+   const { email, resetToken } = req.params;
+   const service = await UsersService.verifyPasswordResetToken(email, resetToken);
+   req.session.destroy();
+   return response(res, service);
+};
+
+export const resetPassword = async (req, res) => {
+   const { email, resetToken, newPassword } = req.body;
+   const service = await UsersService.resetPassword(email, resetToken, newPassword);
+   req.session.destroy();
    return response(res, service);
 };
