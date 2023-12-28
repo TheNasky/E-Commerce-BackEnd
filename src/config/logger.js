@@ -78,7 +78,6 @@ switch (process.env.ENVIRONMENT) {
                level: "debug",
                format: combine(format.colorize({ all: true }), myFormat),
             }),
-
             new transports.File({
                filename: "./dev.errors.logs",
                level: "error",
@@ -121,7 +120,7 @@ export const addLogger = (req, res, next) => {
       const end = Date.now(); // Record the end time
       const duration = end - start; // Calculate the duration
       req.logger.http(
-         `${req.method} Method hit on ${req.originalUrl} from [${ipClient}] - ${duration}ms`
+         `${req.method} Method hit on ${req.originalUrl} from [${ipClient}] - ${duration}ms`,
       );
    });
 

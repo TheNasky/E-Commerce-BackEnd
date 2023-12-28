@@ -2,6 +2,15 @@ import BlogsModel from "../schemas/blogsSchema.js";
 import { resFail, resSuccess } from "../config/utils/response.js";
 import { logger } from "../config/logger.js";
 import mongoose from "mongoose";
+import storage from "../config/firebaseConfig.js";
+import fs from "fs";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class BlogsService {
    static async createBlog(blogProperties) {
@@ -142,6 +151,87 @@ class BlogsService {
          }
          await blog.save({ new: true });
          return resSuccess(200, `Blog ${blog._id} disliked`);
+      } catch (error) {
+         logger.error(`${error.stack}`);
+         return resFail(500, "Internal Server Error");
+      }
+   }
+   static async uploadImage(id, files) {
+      try {
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return resFail(400, "Invalid blog ID");
+         }
+         if (!files || files.length <= 0) {
+            return resFail(400, "Please upload at least one image");
+         }
+         const blog = await BlogsModel.findById(id);
+         if (!blog) {
+            return resFail(404, "Blog not found");
+         }
+         const bucket = storage.bucket();
+         for (const file of files) {
+            const uniquesuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+            const destination = `blogs/${encodeURIComponent(
+               file.fieldname
+            )}-${uniquesuffix}.jpeg`;
+            const fileRef = bucket.file(destination);
+            const buffer = await fs.promises.readFile(file.path);
+            // Resize the image using sharp
+            const resizedBuffer = await sharp(buffer)
+               .resize({ width: 400, height: 300, fit: "inside" })
+               .toFormat("jpeg")
+               .jpeg({ quality: 90 })
+               .toBuffer();
+            // Upload the resized buffer to Firebase Storage
+            await fileRef.createWriteStream().end(resizedBuffer);
+            const url = `https://firebasestorage.googleapis.com/v0/b/next-ecommerce-403923.appspot.com/o/${encodeURIComponent(
+               destination
+            )}?alt=media`;
+            blog.images.push({ url });
+            await blog.save({ new: true });
+            const localFilePath = join(__dirname, `../public/images/${file.filename}`);
+            await fs.promises.unlink(localFilePath);
+         }
+
+         return resSuccess(200, "Image uploaded to blog " + id, { blog });
+      } catch (error) {
+         logger.error(`${error.stack}`);
+         return resFail(500, "Internal Server Error");
+      }
+   }
+   static async deleteImage(id, url) {
+      try {
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return resFail(400, "Invalid blog ID");
+         }
+         const blog = await BlogsModel.findById(id);
+         if (!blog) {
+            return resFail(404, "Blog not found");
+         }
+         const imageIndex = blog.images.findIndex((img) => img.url === url);
+         if (imageIndex === -1) {
+            return resFail(400, "Image not found in the blog");
+         }
+         blog.images.splice(imageIndex, 1);
+         await blog.save({ new: true });
+         return resSuccess(200, "Image deleted from blog " + id, { blog });
+      } catch (error) {
+         logger.error(`${error.stack}`);
+         return resFail(500, "Internal Server Error");
+      }
+   }
+   static async updateImages(id, imageUrls) {
+      try {
+         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return resFail(400, "Invalid blog ID");
+         }
+         const blog = await BlogsModel.findById(id);
+         if (!blog) {
+            return resFail(404, "Blog not found");
+         }
+         blog.images = imageUrls.map((url) => ({ url }));
+         await blog.save({ new: true });
+         return resSuccess(200, "Images updated successfully", { blog });
       } catch (error) {
          logger.error(`${error.stack}`);
          return resFail(500, "Internal Server Error");

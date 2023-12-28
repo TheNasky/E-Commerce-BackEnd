@@ -61,6 +61,26 @@ class UsersService {
       }
    }
 
+   static async getWishlist(userId) {
+      try {
+         if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return resFail(400, "Invalid user ID");
+         }
+         const user = await UsersModel.findById(userId).populate({
+            path: "wishlist.product",
+            model: "products",
+         });
+         if (!user) {
+            return resFail(404, "User not found");
+         }
+         const wishlist = user.wishlist.map((item) => item.product);
+         return resSuccess(200, "Wishlist retrieved successfully", { wishlist });
+      } catch (error) {
+         logger.error(`${error.stack}`);
+         return resFail(500, "Internal Server Error");
+      }
+   }
+
    static async getUsers() {
       try {
          const users = await UsersModel.find({});
@@ -75,7 +95,10 @@ class UsersService {
          if (!mongoose.Types.ObjectId.isValid(id)) {
             return resFail(400, "Invalid user ID");
          }
-         const user = await UsersModel.findOne({ _id: id });
+         const user = await UsersModel.findOne({ _id: id }).populate({
+            path: "wishlist.product",
+            model: "products",
+         });
          if (!user) {
             return resFail(400, "User Not Found");
          }
@@ -121,7 +144,9 @@ class UsersService {
          });
          await user.save({ new: true });
 
-         return resSuccess(200, "User " + id + " Updated Successfully", { updatedUser: user });
+         return resSuccess(200, "User " + id + " Updated Successfully", {
+            updatedUser: user,
+         });
       } catch (error) {
          logger.error(`${error.stack}`);
          return resFail(500, "Internal Server Error");
@@ -179,8 +204,7 @@ class UsersService {
          const resetTokenExpire = new Date(Date.now() + 3600000); // Token expires in 1 hour
          user.pwResetToken = hashedToken;
          user.pwResetTokenExpire = resetTokenExpire;
-         await user.save(); 
-
+         await user.save();
 
          MailingService.sendPasswordResetEmail(user.email, hashedToken);
          return resSuccess(200, "Password reset token sent if email is registered");
@@ -191,7 +215,10 @@ class UsersService {
    }
    static async verifyPasswordResetToken(email, resetToken) {
       try {
-         const user = await UsersModel.findOne({ email: email, pwResetToken: resetToken });
+         const user = await UsersModel.findOne({
+            email: email,
+            pwResetToken: resetToken,
+         });
          if (!user || user.pwResetTokenExpire < new Date()) {
             return resFail(400, "Invalid or expired reset token");
          }
@@ -226,7 +253,6 @@ class UsersService {
          return resFail(500, "Internal Server Error");
       }
    }
-   
 }
 
 export default UsersService;

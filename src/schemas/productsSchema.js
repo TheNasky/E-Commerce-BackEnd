@@ -30,12 +30,14 @@ const schema = new mongoose.Schema(
       },
       brand: {
          type: String,
-         enum: ["Apple", "Samsung", "Lenovo"],
       },
       stock: {
          type: Number,
          default: 0,
          required: true,
+      },
+      color: {
+         type: String,
       },
       sold: {
          type: Number,
@@ -44,13 +46,27 @@ const schema = new mongoose.Schema(
       images: {
          type: Array,
       },
-      color: {
-         type: String,
-         enum: ["black", "brown", "red"],
-      },
-      ratings: [
-         { star: Number, postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" } },
+      reviews: [
+         {
+            rating: {
+               type: Number,
+               required: true,
+               min: 1,
+               max: 5,
+            },
+            comment: String,
+            postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+            _id: false,
+         },
       ],
+      averagerating: {
+         type: Number,
+         default: 0,
+      },
+      numberofratings: {
+         type: Number,
+         default: 0,
+      },
    },
    {
       timestamps: true,
@@ -60,7 +76,13 @@ const schema = new mongoose.Schema(
 
 schema.pre("validate", function (next) {
    if (this.category) {
-      this.category = this.category.toLowerCase();
+      this.category = slugify(this.category.toLowerCase());
+   }
+   if (this.brand) {
+      this.brand = slugify(this.brand.toLowerCase());
+   }
+   if (this.color) {
+      this.color = slugify(this.color.toLowerCase());
    }
    this.slug = slugify(this.title);
 

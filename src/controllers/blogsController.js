@@ -44,3 +44,24 @@ export const dislikeBlog = async (req, res) => {
    const service = await BlogsService.dislikeBlog(id, userId);
    return response(res, service);
 };
+
+export const uploadImages = async (req, res) => {
+   const { id } = req.params;
+   const files = req.files;
+   const service = await BlogsService.uploadImage(id, files);
+   return response(res, service);
+};
+
+export const deleteImage = async (req, res) => {
+   const { id } = req.params;
+   const { url } = req.body;
+   const service = await BlogsService.deleteImage(id, url);
+   return response(res, service);
+};
+
+export const updateImages = async (req, res) => {
+   const { id } = req.params;
+   const { images } = req.body;
+   const service = await BlogsService.updateImages(id, images);
+   return response(res, service);
+};

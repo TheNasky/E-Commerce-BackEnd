@@ -1,7 +1,7 @@
 import express from "express";
-const blogRouter = express.Router();
+const blogsRouter = express.Router();
 import { createBlog } from "../controllers/blogsController.js";
-import { isAdmin } from "../middlewares/auth.js";
+import { isAdmin, isLoggedIn } from "../middlewares/auth.js";
 import {
    getBlogs,
    getBlog,
@@ -9,14 +9,20 @@ import {
    deleteBlog,
    likeBlog,
    dislikeBlog,
+   uploadImages,
+   deleteImage,
+   updateImages
 } from "../controllers/blogsController.js";
+import { multerUploadImage } from "../middlewares/uploadImages.js";
 
-blogRouter.post("/", isAdmin, createBlog);
-blogRouter.get("/", getBlogs);
-blogRouter.get("/:id", getBlog);
-blogRouter.put("/:id", isAdmin, updateBlog);
-blogRouter.delete("/:id", isAdmin, deleteBlog);
-blogRouter.put("/like/:id", likeBlog);
-blogRouter.put("/dislike/:id", dislikeBlog);
-
-export default blogRouter;
+blogsRouter.post("/", isAdmin, createBlog);
+blogsRouter.get("/", getBlogs);
+blogsRouter.get("/:id", getBlog);
+blogsRouter.put("/:id", isAdmin, updateBlog);
+blogsRouter.delete("/:id", isAdmin, deleteBlog);
+blogsRouter.put("/like/:id", isLoggedIn, likeBlog);
+blogsRouter.put("/dislike/:id", isLoggedIn, dislikeBlog);
+blogsRouter.put("/upload/:id", isAdmin, multerUploadImage, uploadImages);
+blogsRouter.delete("/deleteImage/:id", isAdmin, deleteImage);
+blogsRouter.put("/updateImages/:id", isAdmin, updateImages);
+export default blogsRouter;

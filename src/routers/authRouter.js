@@ -9,9 +9,9 @@ import {
    verifyPasswordResetToken,
    resetPassword,
 } from "../controllers/usersController.js";
-import { isAdmin } from "../middlewares/auth.js";
+import { isAdmin, isLoggedIn } from "../middlewares/auth.js";
 
-authRouter.get("/session", getSession); // isAdmin,
+authRouter.get("/session", isLoggedIn, getSession); // isAdmin,
 authRouter.post("/register", createUser);
 authRouter.post("/login", loginUser);
 authRouter.post("/logout", logout);

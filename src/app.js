@@ -8,11 +8,15 @@ import compression from "compression";
 import MongoStore from "connect-mongo";
 import { connectDb } from "./config/utils/mongoConnect.js";
 import { addLogger } from "./config/logger.js"; // Import logger and addLogger
+import {logger} from "./config/logger.js";
 
 import authRouter from "./routers/authRouter.js";
 import usersRouter from "./routers/usersRouter.js";
 import productsRouter from "./routers/productsRouter.js";
 import blogsRouter from "./routers/blogsRouter.js";
+import categoriesRouter from "./routers/categoriesRouter.js";
+import brandsRouter from "./routers/brandsRouter.js";
+import couponsRouter from "./routers/couponsRouter.js";
 
 connectDb();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +26,7 @@ app.listen(PORT, () => {
 });
 
 // Middlewares //
-
+app.use(addLogger);
 app.use(express.json()); // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded requests
 app.use(
@@ -35,13 +39,12 @@ app.use(
       secret: process.env.SESSION_SECRET,
       resave: true,
       saveUninitialized: true,
-   })
+   }),
 );
 
 // initializePassport();
 // app.use(passport.initialize());
 // app.use(passport.session());
-app.use(addLogger);
 app.use(compression({})); // Enable response compression
 
 // Routers //
@@ -50,6 +53,10 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/blogs", blogsRouter);
+app.use("/api/categories", categoriesRouter);
+app.use("/api/brands", brandsRouter);
+app.use("/api/coupons", couponsRouter);
+
 // Error handlers //
 
 //  Bad JSON //
@@ -63,5 +70,6 @@ app.use((err, req, res, next) => {
 
 // Catch all //
 app.use((err, req, res, next) => {
+   logger.error(`${err.stack}`);
    res.status(500).json({ error: "Internal Server Error (Catch all)" });
 });

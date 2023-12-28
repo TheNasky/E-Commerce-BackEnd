@@ -30,7 +30,7 @@ const schema = new mongoose.Schema(
    {
       timestamps: true,
       versionKey: false,
-   }
+   },
 );
 
 const UsersModel = mongoose.model("users", schema);

@@ -1,28 +1,19 @@
-export function isUser(req, res, next) {
-   if (req.isAuthenticated()) {
+export function isLoggedIn(req, res, next) {
+   if (req.session?.user) {
       return next();
    }
-   return res.status(401).json({
-      code: "UNAUTHENTICATED",
-      message: "Failed Authentication",
+   return res.status(403).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      message: "You must log in to access this resource.",
    });
 }
-
 export function isAdmin(req, res, next) {
    if (req.session?.user?.roles?.includes("Admin")) {
       return next();
    }
    return res.status(403).json({
-      code: "UNAUTHORIZED",
-      message: "You do not have permission to access this resource.",
-   });
-}
-
-export function isCartOwner(req, res, next) {
-   if (req.session?.user?.cart == req.params.cid) {
-      return next();
-   }
-   return res.status(403).json({
+      success: false,
       code: "UNAUTHORIZED",
       message: "You do not have permission to access this resource.",
    });

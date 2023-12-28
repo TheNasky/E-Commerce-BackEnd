@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const schema = new mongoose.Schema(
    {
@@ -33,9 +34,8 @@ const schema = new mongoose.Schema(
             ref: "users",
          },
       ],
-      image: {
-         type: String,
-         default: "https://cdn.logojoy.com/wp-content/uploads/2018/05/30164225/572.png",
+      images: {
+         type: Array,
       },
       author: {
          type: String,
@@ -51,8 +51,14 @@ const schema = new mongoose.Schema(
       },
       versionKey: false,
       timestamps: true,
-   }
+   },
 );
+schema.pre("validate", function (next) {
+   if (this.category) {
+      this.category = slugify(this.category.toLowerCase());
+   }
+   next();
+});
 
 const BlogsModel = mongoose.model("blogs", schema);
 
